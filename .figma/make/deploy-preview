@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pnpm run build
+[[ -d "dist/clinique-connect/browser" ]] || {
+  echo "Expected build output at dist/clinique-connect/browser" >&2
+  exit 1
+}
+figma make deploy-preview --build-dir "dist/clinique-connect/browser"

@@ -1,0 +1,254 @@
+<div class="app-shell">
+  <aside class="sidebar" [class.open]="mobileMenuOpen">
+    <div class="brand">
+      <div class="brand-mark"><lucide-icon [img]="icons.HeartPulse" [size]="25"></lucide-icon></div>
+      <div><strong>CLINIQUE</strong><span>CONNECT</span></div>
+      <button class="mobile-close" type="button" aria-label="Fermer le menu" (click)="mobileMenuOpen = false">
+        <lucide-icon [img]="icons.X" [size]="20"></lucide-icon>
+      </button>
+    </div>
+
+    <nav aria-label="Navigation principale">
+      <p class="nav-label">Espace de travail</p>
+      @for (item of nav; track item.id) {
+        <button type="button" class="nav-item" [class.active]="activeSection === item.id" (click)="selectSection(item.id)">
+          <lucide-icon [img]="item.icon" [size]="19"></lucide-icon>
+          <span>{{ item.label }}</span>
+          @if (item.id === 'admissions' && dashboard.waiting) {
+            <span class="nav-count">{{ dashboard.waiting }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button type="button" class="nav-item"><lucide-icon [img]="icons.CircleHelp" [size]="19"></lucide-icon><span>Centre d’aide</span></button>
+      <button type="button" class="nav-item"><lucide-icon [img]="icons.Settings" [size]="19"></lucide-icon><span>Paramètres</span></button>
+      <div class="user-card">
+        <span class="avatar">MN</span>
+        <div><strong>Marie Nkom</strong><span>Accueil & secrétariat</span></div>
+        <lucide-icon [img]="icons.ChevronRight" [size]="17"></lucide-icon>
+      </div>
+      <div class="connection">
+        <span class="connection-dot"></span>
+        <span>{{ api.usingDemo.value ? 'Mode démonstration' : 'Serveur connecté' }}</span>
+        <lucide-icon [img]="icons.Wifi" [size]="14"></lucide-icon>
+      </div>
+    </div>
+  </aside>
+  @if (mobileMenuOpen) { <button class="scrim" type="button" aria-label="Fermer" (click)="mobileMenuOpen = false"></button> }
+
+  <main>
+    <header class="topbar">
+      <button class="menu-button" type="button" aria-label="Ouvrir le menu" (click)="mobileMenuOpen = true">
+        <lucide-icon [img]="icons.Menu" [size]="21"></lucide-icon>
+      </button>
+      <div class="crumb"><span>Espace accueil</span><lucide-icon [img]="icons.ChevronRight" [size]="14"></lucide-icon><strong>{{ sectionTitle }}</strong></div>
+      <div class="top-actions">
+        <div class="secure-pill"><lucide-icon [img]="icons.ShieldCheck" [size]="15"></lucide-icon><span>Session sécurisée</span></div>
+        <div class="notification-wrap">
+          <button class="icon-button" type="button" aria-label="Notifications" (click)="showNotifications = !showNotifications">
+            <lucide-icon [img]="icons.Bell" [size]="20"></lucide-icon><span class="unread"></span>
+          </button>
+          @if (showNotifications) {
+            <div class="notification-popover">
+              <div class="popover-head"><strong>Notifications</strong><span>2 nouvelles</span></div>
+              <div class="notification-row"><span class="mini-icon sage"><lucide-icon [img]="icons.CalendarDays" [size]="16"></lucide-icon></span><div><strong>Rendez-vous confirmé</strong><p>Grâce Nana · aujourd’hui à 10:00</p></div></div>
+              <div class="notification-row"><span class="mini-icon amber"><lucide-icon [img]="icons.Clock3" [size]="16"></lucide-icon></span><div><strong>File d’attente</strong><p>5 patients attendent une orientation</p></div></div>
+            </div>
+          }
+        </div>
+        <div class="top-avatar">MN</div>
+      </div>
+    </header>
+
+    <div class="content">
+      @if (notice) {
+        <div class="toast"><lucide-icon [img]="icons.Check" [size]="17"></lucide-icon>{{ notice }}</div>
+      }
+
+      @if (activeSection === 'dashboard') {
+        <section class="welcome">
+          <div>
+            <p class="eyebrow">Lundi 24 juin</p>
+            <h1>Bonjour Marie,</h1>
+            <p>Voici l’activité de la clinique pour aujourd’hui.</p>
+          </div>
+          <button type="button" class="primary-button" (click)="showCreatePatient = true">
+            <lucide-icon [img]="icons.Plus" [size]="18"></lucide-icon>Nouveau patient
+          </button>
+        </section>
+
+        <section class="stat-grid" aria-label="Indicateurs du jour">
+          <article class="stat-card">
+            <div class="stat-icon green"><lucide-icon [img]="icons.CalendarDays" [size]="21"></lucide-icon></div>
+            <div class="stat-top"><span>Rendez-vous</span><span class="trend">+3</span></div>
+            <strong>{{ loading ? '—' : dashboard.appointmentsToday }}</strong><p>Aujourd’hui</p>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon blue"><lucide-icon [img]="icons.UserRound" [size]="21"></lucide-icon></div>
+            <div class="stat-top"><span>Patients arrivés</span><span class="trend">+12%</span></div>
+            <strong>{{ loading ? '—' : dashboard.arrivals }}</strong><p>Depuis 07:30</p>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon amber"><lucide-icon [img]="icons.Clock3" [size]="21"></lucide-icon></div>
+            <div class="stat-top"><span>En attente</span><span class="status-live">Temps réel</span></div>
+            <strong>{{ loading ? '—' : dashboard.waiting }}</strong><p>Attente moy. 18 min</p>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon purple"><lucide-icon [img]="icons.FileText" [size]="21"></lucide-icon></div>
+            <div class="stat-top"><span>Tâches à traiter</span></div>
+            <strong>{{ loading ? '—' : dashboard.pendingTasks }}</strong><p>Dont 1 prioritaire</p>
+          </article>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel schedule-panel">
+            <div class="panel-head">
+              <div><h2>Planning du jour</h2><p>{{ dashboard.appointmentsToday }} rendez-vous programmés</p></div>
+              <button type="button" class="text-button" (click)="selectSection('planning')">Voir le planning<lucide-icon [img]="icons.ArrowRight" [size]="16"></lucide-icon></button>
+            </div>
+            <div class="appointment-list">
+              @if (loading) {
+                @for (_ of [1,2,3,4]; track $index) { <div class="appointment skeleton"></div> }
+              } @else {
+                @for (appointment of visibleAppointments; track appointment.id; let last = $last) {
+                  <div class="appointment" [class.last]="last">
+                    <time>{{ appointment.start_at | date:'HH:mm' }}</time>
+                    <span class="timeline-dot" [class.active]="appointment.status === 'in_consultation'"></span>
+                    <div class="patient-avatar">{{ initials(appointment.patient.first_name, appointment.patient.last_name) }}</div>
+                    <div class="appointment-info">
+                      <strong>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</strong>
+                      <span>{{ appointment.reason }} · Dr {{ appointment.professional.last_name }}</span>
+                    </div>
+                    <span class="status-badge" [attr.data-status]="appointment.status">
+                      <span class="badge-dot"></span>{{ statusLabel(appointment.status) }}
+                    </span>
+                    <button class="more-button" type="button" aria-label="Plus d’options"><lucide-icon [img]="icons.MoreHorizontal" [size]="19"></lucide-icon></button>
+                  </div>
+                }
+              }
+            </div>
+          </article>
+
+          <aside class="right-column">
+            <article class="panel quick-panel">
+              <div class="panel-head"><div><h2>Actions rapides</h2><p>Vos tâches fréquentes</p></div></div>
+              <button type="button" class="quick-action" (click)="showCreatePatient = true">
+                <span class="quick-icon green"><lucide-icon [img]="icons.UserRound" [size]="19"></lucide-icon></span>
+                <span><strong>Créer un patient</strong><small>Nouvelle fiche administrative</small></span>
+                <lucide-icon [img]="icons.ChevronRight" [size]="17"></lucide-icon>
+              </button>
+              <button type="button" class="quick-action" (click)="selectSection('planning')">
+                <span class="quick-icon blue"><lucide-icon [img]="icons.CalendarDays" [size]="19"></lucide-icon></span>
+                <span><strong>Prendre rendez-vous</strong><small>Planifier une consultation</small></span>
+                <lucide-icon [img]="icons.ChevronRight" [size]="17"></lucide-icon>
+              </button>
+              <button type="button" class="quick-action" (click)="selectSection('admissions')">
+                <span class="quick-icon amber"><lucide-icon [img]="icons.Stethoscope" [size]="19"></lucide-icon></span>
+                <span><strong>Enregistrer une arrivée</strong><small>Ajouter à la file d’attente</small></span>
+                <lucide-icon [img]="icons.ChevronRight" [size]="17"></lucide-icon>
+              </button>
+            </article>
+
+            <article class="sync-card">
+              <span class="sync-icon"><lucide-icon [img]="icons.Activity" [size]="20"></lucide-icon></span>
+              <div><strong>Systèmes opérationnels</strong><p>Dernière synchronisation il y a 2 min</p></div>
+              <span class="live-dot"></span>
+            </article>
+          </aside>
+        </section>
+      } @else {
+        <section class="module-heading">
+          <div>
+            <p class="eyebrow">Espace accueil</p>
+            <h1>{{ sectionTitle }}</h1>
+            <p>
+              @switch (activeSection) {
+                @case ('patients') { Recherchez et gérez les dossiers administratifs. }
+                @case ('planning') { Organisez les consultations et disponibilités du jour. }
+                @case ('admissions') { Orientez les patients arrivés dans la clinique. }
+                @case ('billing') { Suivez les factures et encaissements autorisés. }
+                @case ('support') { Gérez les demandes administratives, hors dossier médical. }
+              }
+            </p>
+          </div>
+          @if (activeSection === 'patients') {
+            <button type="button" class="primary-button" (click)="showCreatePatient = true"><lucide-icon [img]="icons.Plus" [size]="18"></lucide-icon>Nouveau patient</button>
+          }
+        </section>
+
+        @if (activeSection === 'patients') {
+          <article class="panel module-panel">
+            <div class="search-field"><lucide-icon [img]="icons.Search" [size]="18"></lucide-icon><input [(ngModel)]="searchQuery" placeholder="Nom, téléphone ou référence patient…" aria-label="Rechercher un patient"></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Patient</th><th>Référence</th><th>Téléphone</th><th>Ville</th><th>Statut</th><th></th></tr></thead>
+                <tbody>
+                  @for (patient of filteredPatients; track patient.id) {
+                    <tr><td><div class="patient-cell"><span class="patient-avatar">{{ initials(patient.first_name, patient.last_name) }}</span><strong>{{ patient.first_name }} {{ patient.last_name }}</strong></div></td><td>{{ patient.reference }}</td><td>{{ patient.phone || 'Non renseigné' }}</td><td>{{ patient.city || '—' }}</td><td><span class="status-badge" data-status="confirmed"><span class="badge-dot"></span>Actif</span></td><td><button class="more-button" type="button"><lucide-icon [img]="icons.MoreHorizontal" [size]="18"></lucide-icon></button></td></tr>
+                  } @empty { <tr><td colspan="6" class="empty-state">Aucun patient ne correspond à votre recherche.</td></tr> }
+                </tbody>
+              </table>
+            </div>
+          </article>
+        }
+
+        @if (activeSection === 'planning') {
+          <article class="panel module-panel">
+            <div class="panel-head"><div><h2>Rendez-vous du jour</h2><p>Vue chronologique · Médecine générale</p></div><button class="secondary-button" type="button"><lucide-icon [img]="icons.Plus" [size]="17"></lucide-icon>Nouveau rendez-vous</button></div>
+            <div class="appointment-list expanded">
+              @for (appointment of appointments; track appointment.id) {
+                <div class="appointment"><time>{{ appointment.start_at | date:'HH:mm' }}</time><span class="timeline-dot"></span><div class="patient-avatar">{{ initials(appointment.patient.first_name, appointment.patient.last_name) }}</div><div class="appointment-info"><strong>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</strong><span>{{ appointment.reason }} · Dr {{ appointment.professional.last_name }}</span></div><span class="status-badge" [attr.data-status]="appointment.status"><span class="badge-dot"></span>{{ statusLabel(appointment.status) }}</span><button class="more-button" type="button"><lucide-icon [img]="icons.MoreHorizontal" [size]="19"></lucide-icon></button></div>
+              }
+            </div>
+          </article>
+        }
+
+        @if (activeSection === 'admissions') {
+          <section class="queue-grid">
+            @for (appointment of waitingPatients; track appointment.id) {
+              <article class="panel queue-card">
+                <div class="queue-number">N° {{ appointment.queue_number }}</div>
+                <div class="patient-avatar large">{{ initials(appointment.patient.first_name, appointment.patient.last_name) }}</div>
+                <h3>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h3>
+                <p>{{ appointment.reason }}</p>
+                <span class="status-badge" [attr.data-status]="appointment.status"><span class="badge-dot"></span>{{ statusLabel(appointment.status) }}</span>
+                <button class="secondary-button full" type="button">Voir l’admission<lucide-icon [img]="icons.ArrowRight" [size]="16"></lucide-icon></button>
+              </article>
+            }
+            <article class="add-arrival" role="button" tabindex="0"><span><lucide-icon [img]="icons.Plus" [size]="22"></lucide-icon></span><strong>Enregistrer une arrivée</strong><p>Ajouter un patient à la file</p></article>
+          </section>
+        }
+
+        @if (activeSection === 'billing' || activeSection === 'support') {
+          <article class="panel coming-panel">
+            <span class="coming-icon"><lucide-icon [img]="activeSection === 'billing' ? icons.CircleDollarSign : icons.MessageSquareText" [size]="28"></lucide-icon></span>
+            <h2>{{ activeSection === 'billing' ? 'Centre de facturation' : 'Support administratif' }}</h2>
+            <p>{{ activeSection === 'billing' ? 'Le module est prêt à recevoir les factures et paiements depuis l’API.' : 'Les tickets restent strictement séparés des dossiers médicaux.' }}</p>
+            <div class="api-ready"><lucide-icon [img]="icons.Check" [size]="16"></lucide-icon>Connecteur API configuré</div>
+          </article>
+        }
+      }
+    </div>
+  </main>
+</div>
+
+@if (showCreatePatient) {
+  <div class="modal-backdrop" role="presentation" (click)="showCreatePatient = false">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="patient-title" (click)="$event.stopPropagation()">
+      <div class="modal-head"><div><p class="eyebrow">Dossier administratif</p><h2 id="patient-title">Nouveau patient</h2></div><button class="icon-button" type="button" aria-label="Fermer" (click)="showCreatePatient = false"><lucide-icon [img]="icons.X" [size]="20"></lucide-icon></button></div>
+      <p class="modal-intro">Renseignez les informations d’identité. Les champs médicaux seront accessibles uniquement aux professionnels autorisés.</p>
+      <form [formGroup]="patientForm" (ngSubmit)="submitPatient()">
+        <div class="form-grid">
+          <label><span>Prénom <b>*</b></span><input formControlName="first_name" placeholder="Ex. Mireille"><small *ngIf="patientForm.controls.first_name.touched && patientForm.controls.first_name.invalid">Le prénom est requis.</small></label>
+          <label><span>Nom <b>*</b></span><input formControlName="last_name" placeholder="Ex. Ngono"><small *ngIf="patientForm.controls.last_name.touched && patientForm.controls.last_name.invalid">Le nom est requis.</small></label>
+          <label><span>Téléphone</span><input formControlName="phone" placeholder="+237 6 …"></label>
+          <label><span>Ville</span><input formControlName="city"></label>
+        </div>
+        <div class="privacy-note"><lucide-icon [img]="icons.ShieldCheck" [size]="17"></lucide-icon><span>Les données sont envoyées au serveur sécurisé et ne sont pas conservées dans ce navigateur.</span></div>
+        <div class="modal-actions"><button class="ghost-button" type="button" (click)="showCreatePatient = false">Annuler</button><button class="primary-button" type="submit">Créer le patient</button></div>
+      </form>
+    </section>
+  </div>
+}
